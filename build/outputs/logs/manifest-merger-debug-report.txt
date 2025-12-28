@@ -1,0 +1,71 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:2:1-19:12
+INJECTED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:2:1-19:12
+INJECTED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:2:1-19:12
+INJECTED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:2:1-19:12
+	package
+		INJECTED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml
+	android:versionName
+		INJECTED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml
+	android:versionCode
+		INJECTED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml
+	xmlns:android
+		ADDED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:2:11-69
+uses-permission#android.permission.CAMERA
+ADDED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:4:5-65
+	android:name
+		ADDED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:4:22-62
+uses-permission#android.permission.RECORD_AUDIO
+ADDED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:5:5-71
+	android:name
+		ADDED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:5:22-68
+uses-permission#android.permission.ACCESS_FINE_LOCATION
+ADDED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:6:5-79
+	android:name
+		ADDED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:6:22-76
+uses-permission#android.permission.FOREGROUND_SERVICE
+ADDED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:7:5-77
+	android:name
+		ADDED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:7:22-74
+uses-permission#android.permission.WAKE_LOCK
+ADDED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:8:5-68
+	android:name
+		ADDED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:8:22-65
+application
+ADDED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:10:5-18:19
+INJECTED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:10:5-18:19
+	android:extractNativeLibs
+		INJECTED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml
+	android:label
+		ADDED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:10:18-42
+activity#com.kask.cam.MainActivity
+ADDED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:11:9-16:20
+	android:exported
+		ADDED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:11:48-71
+	android:name
+		ADDED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:11:19-47
+intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
+ADDED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:12:13-15:29
+action#android.intent.action.MAIN
+ADDED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:13:17-69
+	android:name
+		ADDED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:13:25-66
+category#android.intent.category.LAUNCHER
+ADDED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:14:17-77
+	android:name
+		ADDED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:14:27-74
+service#com.kask.cam.CamService
+ADDED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:17:9-72
+	android:exported
+		ADDED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:17:45-69
+	android:name
+		ADDED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:17:18-44
+uses-sdk
+INJECTED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml
+INJECTED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml

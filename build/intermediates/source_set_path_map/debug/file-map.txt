@@ -1,0 +1,7 @@
+com.kask.cam-pngs-0 /data/data/com.termux/files/home/KaskCam/build/generated/res/pngs/debug
+com.kask.cam-resValues-1 /data/data/com.termux/files/home/KaskCam/build/generated/res/resValues/debug
+com.kask.cam-packageDebugResources-2 /data/data/com.termux/files/home/KaskCam/build/intermediates/incremental/debug/packageDebugResources/merged.dir
+com.kask.cam-packageDebugResources-3 /data/data/com.termux/files/home/KaskCam/build/intermediates/incremental/debug/packageDebugResources/stripped.dir
+com.kask.cam-merged_res-4 /data/data/com.termux/files/home/KaskCam/build/intermediates/merged_res/debug
+com.kask.cam-debug-5 /data/data/com.termux/files/home/KaskCam/src/debug/res
+com.kask.cam-main-6 /data/data/com.termux/files/home/KaskCam/src/main/res

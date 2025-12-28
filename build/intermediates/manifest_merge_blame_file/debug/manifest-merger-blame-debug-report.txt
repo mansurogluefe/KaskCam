@@ -1,0 +1,59 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.kask.cam"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="26"
+9        android:targetSdkVersion="34" />
+10
+11    <uses-permission android:name="android.permission.CAMERA" />
+11-->/data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:4:5-65
+11-->/data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:4:22-62
+12    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+12-->/data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:5:5-71
+12-->/data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:5:22-68
+13    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+13-->/data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:6:5-79
+13-->/data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:6:22-76
+14    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+14-->/data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:7:5-77
+14-->/data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:7:22-74
+15    <uses-permission android:name="android.permission.WAKE_LOCK" />
+15-->/data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:8:5-68
+15-->/data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:8:22-65
+16
+17    <application
+17-->/data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:10:5-18:19
+18        android:debuggable="true"
+19        android:extractNativeLibs="false"
+20        android:label="Kask Cam" >
+20-->/data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:10:18-42
+21        <activity
+21-->/data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:11:9-16:20
+22            android:name="com.kask.cam.MainActivity"
+22-->/data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:11:19-47
+23            android:exported="true" >
+23-->/data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:11:48-71
+24            <intent-filter>
+24-->/data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:12:13-15:29
+25                <action android:name="android.intent.action.MAIN" />
+25-->/data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:13:17-69
+25-->/data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:13:25-66
+26
+27                <category android:name="android.intent.category.LAUNCHER" />
+27-->/data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:14:17-77
+27-->/data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:14:27-74
+28            </intent-filter>
+29        </activity>
+30
+31        <service
+31-->/data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:17:9-72
+32            android:name="com.kask.cam.CamService"
+32-->/data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:17:18-44
+33            android:exported="false" />
+33-->/data/data/com.termux/files/home/KaskCam/src/main/AndroidManifest.xml:17:45-69
+34    </application>
+35
+36</manifest>
