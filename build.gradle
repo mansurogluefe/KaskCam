@@ -4,8 +4,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        // 8.2.0 yerine daha stabil 7.4.2 kullanıyoruz
-        classpath 'com.android.tools.build:gradle:7.4.2'
+        classpath 'com.android.tools.build:gradle:8.2.0'
     }
 }
 
@@ -20,12 +19,12 @@ apply plugin: 'com.android.application'
 
 android {
     namespace 'com.kask.cam'
-    compileSdk 33 // 34'ten 33'e çektik (uyumluluk için)
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.kask.cam"
         minSdk 26
-        targetSdk 33
+        targetSdk 34
         versionCode 1
         versionName "1.0"
     }
