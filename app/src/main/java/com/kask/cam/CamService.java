@@ -8,16 +8,13 @@ import android.app.NotificationManager;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.CountDownTimer;
-import android.os.IBinder;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
@@ -37,9 +34,7 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.common.util.concurrent.ListenableFuture;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
@@ -66,13 +61,16 @@ public class CamService extends LifecycleService {
 
     private Notification createNotification() {
         String channelId = "kask_cam_channel";
-        NotificationChannel channel = new NotificationChannel(channelId, "Kask Kayıt Servisi", NotificationManager.IMPORTANCE_LOW);
-        getSystemService(NotificationManager.class).createNotificationChannel(channel);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(channelId, "Kask Kayıt Servisi", NotificationManager.IMPORTANCE_LOW);
+            getSystemService(NotificationManager.class).createNotificationChannel(channel);
+        }
 
         return new NotificationCompat.Builder(this, channelId)
                 .setContentTitle("Kask Kamerası Aktif")
-                .setContentText("Arka planda güvenli kayıt yapılıyor...")
+                .setContentText("Kayıt devam ediyor...")
                 .setSmallIcon(android.R.drawable.ic_menu_camera)
+                .setOngoing(true)
                 .build();
     }
 
@@ -82,26 +80,21 @@ public class CamService extends LifecycleService {
             try {
                 ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
                 
-                // GENİŞ AÇI SEÇİMİ (Varsa Ultra Wide, yoksa Arka Kamera)
+                // Geniş açı önceliği için kamera seçimi
                 CameraSelector cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA;
-                // Not: Ultra geniş açı mantığı cihazdan cihaza değişir, varsayılan arka kamera en güvenlisidir.
-
-                Preview preview = new Preview.Builder().build();
-                // Not: Service içinde Preview gösterilmez, bu sadece sanal bağlayıcıdır.
 
                 Recorder recorder = new Recorder.Builder()
-                        .setQualitySelector(QualitySelector.from(Quality.HD)) // Isınmayı önlemek için HD
+                        .setQualitySelector(QualitySelector.from(Quality.HD))
                         .build();
                 videoCapture = VideoCapture.withOutput(recorder);
 
                 cameraProvider.unbindAll();
                 cameraProvider.bindToLifecycle(this, cameraSelector, videoCapture);
 
-                // Kamera hazır olunca kaydı başlat
                 startNewRecordingSegment();
 
             } catch (ExecutionException | InterruptedException e) {
-                Log.e("KaskCam", "Kamera Başlatılamadı", e);
+                Log.e("KaskCam", "Kamera Hatası: " + e.getMessage());
             }
         }, ContextCompat.getMainExecutor(this));
     }
@@ -110,17 +103,15 @@ public class CamService extends LifecycleService {
     private void startNewRecordingSegment() {
         if (videoCapture == null) return;
 
-        // Eski kaydı durdur (Eğer varsa)
         if (currentRecording != null) {
             currentRecording.stop();
             currentRecording = null;
         }
 
-        manageStorageQuota(); // Yer kontrolü yap ve sil
+        checkAndCleanQuota(); // Kayda başlamadan önce kotayı temizle
 
-        // Yeni Dosya İsmi
         if (sessionID == null) sessionID = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(System.currentTimeMillis());
-        String fileName = "KASK_" + sessionID + "_PART" + partCounter + ".mp4";
+        String fileName = "KASK_" + sessionID + "_P" + partCounter;
 
         ContentValues contentValues = new ContentValues();
         contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName);
@@ -132,18 +123,23 @@ public class CamService extends LifecycleService {
                 .setContentValues(contentValues)
                 .build();
 
-        // Sesi kontrol et ve kaydı başlat
+        // ÇÖKMEYİ ENGELLEYEN SES KONTROLÜ
+        var recordingPrepare = videoCapture.getOutput().prepareRecording(this, options);
+        
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-            currentRecording = videoCapture.getOutput()
-                    .prepareRecording(this, options)
-                    .withAudioEnabled()
-                    .start(ContextCompat.getMainExecutor(this), event -> {
-                        if (event instanceof VideoRecordEvent.Start) {
-                            sendBroadcast(new Intent("UPDATE_UI").putExtra("status", "KAYITTA (P" + partCounter + ")"));
-                            startTimerForNextSegment();
-                        }
-                    });
+            try {
+                recordingPrepare = recordingPrepare.withAudioEnabled();
+            } catch (Exception e) {
+                Log.e("KaskCam", "Ses kaynağı hatası, sessiz devam ediliyor: " + e.getMessage());
+            }
         }
+
+        currentRecording = recordingPrepare.start(ContextCompat.getMainExecutor(this), event -> {
+            if (event instanceof VideoRecordEvent.Start) {
+                sendBroadcast(new Intent("UPDATE_UI").putExtra("status", "KAYITTA (P" + partCounter + ")"));
+                startTimerForNextSegment();
+            }
+        });
     }
 
     private void startTimerForNextSegment() {
@@ -151,23 +147,50 @@ public class CamService extends LifecycleService {
             public void onTick(long millisUntilFinished) {}
             public void onFinish() {
                 partCounter++;
-                startNewRecordingSegment(); // Döngüsel olarak yeni parça başlat
+                startNewRecordingSegment();
             }
         }.start();
     }
 
-    // KOTA YÖNETİMİ: 20GB Dolarsa Eskiyi Sil
-    private void manageStorageQuota() {
-        File dir = new File(getExternalMediaDirs()[0], "KaskCam"); // Örnek yol
-        // Gerçek MediaStore silme işlemi daha karmaşıktır, 
-        // ancak sistem dolunca Android otomatik olarak eski önbellekleri temizler.
-        // Güvenli olması için burada manuel silme kodu karmaşıklık yaratabilir, 
-        // şimdilik basit tuttum.
+    // 20GB KOTA YÖNETİMİ (MediaStore Üzerinden Eski Dosyaları Silme)
+    private void checkAndCleanQuota() {
+        Uri collection = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+        String[] projection = {MediaStore.Video.Media._ID, MediaStore.Video.Media.SIZE};
+        String selection = MediaStore.Video.Media.RELATIVE_PATH + " LIKE ?";
+        String[] selectionArgs = new String[]{"%Movies/KaskCam%"};
+        String sortOrder = MediaStore.Video.Media.DATE_ADDED + " ASC";
+
+        try (Cursor cursor = getContentResolver().query(collection, projection, selection, selectionArgs, sortOrder)) {
+            if (cursor == null) return;
+
+            long totalSize = 0;
+            while (cursor.moveToNext()) {
+                totalSize += cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE));
+            }
+
+            // Eğer kota aşılmışsa en eski dosyadan silmeye başla
+            cursor.moveToFirst();
+            while (totalSize > STORAGE_QUOTA_BYTES && !cursor.isAfterLast()) {
+                long id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
+                long fileSize = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE));
+                Uri deleteUri = Uri.withAppendedPath(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, String.valueOf(id));
+                
+                getContentResolver().delete(deleteUri, null, null);
+                totalSize -= fileSize;
+                cursor.moveToNext();
+                Log.d("KaskCam", "Kota doldu, eski video silindi.");
+            }
+        } catch (Exception e) {
+            Log.e("KaskCam", "Kota temizleme hatası: " + e.getMessage());
+        }
     }
 
     @Override
     public void onDestroy() {
-        if (currentRecording != null) currentRecording.stop();
+        if (currentRecording != null) {
+            currentRecording.stop();
+            currentRecording = null;
+        }
         super.onDestroy();
     }
 }
