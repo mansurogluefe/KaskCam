@@ -6,15 +6,21 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-    <application android:label="Kask Cam">
+    <application 
+        android:label="Kask Cam"
+        android:theme="@style/Theme.AppCompat.NoActionBar">
         <activity android:name=".MainActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHer" />
             </intent-filter>
         </activity>
-        <service android:name=".CamService" android:exported="false" />
+        <service 
+            android:name=".CamService" 
+            android:foregroundServiceType="camera|location|microphone"
+            android:exported="false" />
     </application>
 </manifest>
