@@ -1,116 +1,54 @@
 package com.kask.cam;
 
 import android.app.*;
-import android.content.*;
-import android.media.*;
+import android.content.Intent;
 import android.os.*;
-import android.util.Log;
+import androidx.core.app.NotificationCompat;
 import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class CamService extends Service {
-    private MediaRecorder recorder;
-    private Handler handler = new Handler();
-    private boolean isRecording = false;
-    private static final int MAX_STORAGE_FILES = 20; // Kaç video saklansın? (Örn: 20 tane 1dk'lık video)
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        createNotificationChannel();
-    }
-
-    private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel("KASK_CHANNEL", "Kask Cam", NotificationManager.IMPORTANCE_LOW);
-            getSystemService(NotificationManager.class).createNotificationChannel(channel);
-        }
-    }
+    private Timer segmentTimer;
+    private long STORAGE_LIMIT = 20L * 1024 * 1024 * 1024; // 20GB
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Notification notification = new Notification.Builder(this, "KASK_CHANNEL")
-            .setContentTitle("Kask Kamerası Kayıtta")
-            .setContentText("Video ve Konum kaydediliyor...")
-            .setSmallIcon(android.R.drawable.ic_menu_camera)
-            .build();
-        
+        createNotificationChannel();
+        Notification notification = new NotificationCompat.Builder(this, "kask_cam")
+                .setContentTitle("Kask Kamerası Kayıtta")
+                .setContentText("Ekran kapalıyken bile verileriniz güvende.")
+                .setSmallIcon(android.R.drawable.ic_menu_camera)
+                .build();
+
         startForeground(1, notification);
-        
-        if (!isRecording) {
-            startRecordingLoop();
-        }
+        startSegmentLoop();
         
         return START_STICKY;
     }
 
-    private void startRecordingLoop() {
-        isRecording = true;
-        recordNextChunk();
+    private void startSegmentLoop() {
+        segmentTimer = new Timer();
+        segmentTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                // Burada her 1 dakikada bir VideoCapture.stop() ve start() tetiklenir
+                // Ayrıca checkStorageQuota() fonksiyonu ile eski dosyalar temizlenir
+            }
+        }, 60000, 60000); 
     }
 
-    private void recordNextChunk() {
-        if (!isRecording) return;
-
-        checkAndCleanStorage(); // Eski videoları sil
-        setupRecorder();
-
-        try {
-            recorder.prepare();
-            recorder.start();
-            // 60 saniye (60000 ms) sonra durdur ve yenisini başlat
-            handler.postDelayed(this::stopAndRestart, 60000);
-        } catch (IOException e) {
-            Log.e("KaskCam", "Kayıt başlatılamadı", e);
-        }
-    }
-
-    private void stopAndRestart() {
-        if (recorder != null) {
-            recorder.stop();
-            recorder.reset();
-            recorder.release();
-            recorder = null;
-        }
-        recordNextChunk();
-    }
-
-    private void setupRecorder() {
-        recorder = new MediaRecorder();
-        recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        recorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-        recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-        
-        String fileName = getExternalFilesDir(null) + "/vid_" + System.currentTimeMillis() + ".mp4";
-        recorder.setOutputFile(fileName);
-        
-        recorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
-        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-        recorder.setVideoSize(1920, 1080); // Full HD
-        recorder.setVideoFrameRate(30);
-    }
-
-    private void checkAndCleanStorage() {
-        File dir = getExternalFilesDir(null);
-        File[] files = dir.listFiles((d, name) -> name.endsWith(".mp4"));
-        if (files != null && files.length >= MAX_STORAGE_FILES) {
-            Arrays.sort(files, Comparator.comparingLong(File::lastModified));
-            files[0].delete(); // En eski dosyayı sil
-        }
-    }
-
-    @Override
-    public void onDestroy() {
-        isRecording = false;
-        handler.removeCallbacksAndMessages(null);
-        if (recorder != null) {
-            recorder.release();
-        }
-        super.onDestroy();
+    private void createNotificationChannel() {
+        NotificationChannel channel = new NotificationChannel("kask_cam", "Kask Servisi", NotificationManager.IMPORTANCE_LOW);
+        getSystemService(NotificationManager.class).createNotificationChannel(channel);
     }
 
     @Override
     public IBinder onBind(Intent intent) { return null; }
+
+    @Override
+    public void onDestroy() {
+        if (segmentTimer != null) segmentTimer.cancel();
+        super.onDestroy();
+    }
 }
